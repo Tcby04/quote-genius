@@ -343,6 +343,14 @@
       box-shadow: 0 4px 20px rgba(0, 140, 255, 0.4);
     }
 
+    .payment-btn.stripe {
+      background: #635BFF;
+    }
+
+    .payment-btn.stripe:hover {
+      box-shadow: 0 4px 20px rgba(99, 91, 255, 0.4);
+    }
+
     .payment-note {
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -381,8 +389,8 @@
         <input type="text" id="contact" placeholder="(555) 123-4567">
         
         <label>Payment Link (optional)</label>
-        <input type="text" id="payment" placeholder="Venmo @joe or https://paypal.me/joe">
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">Add your Venmo, CashApp, PayPal, or payment link</p>
+        <input type="text" id="payment" placeholder="Venmo @joe, CashApp $joe, Stripe link, or PayPal">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">Venmo, CashApp, PayPal, or Stripe Payment Link</p>
       </div>
 
       <div class="card">
@@ -677,6 +685,13 @@
             const handle = data.p.replace(/\$/g, '').replace(/cashapp/gi, '').trim();
             paymentUrl = 'https://cash.app/$' + handle + '/' + data.t;
             paymentText = 'Pay with CashApp';
+          } else if (data.p.toLowerCase().includes('stripe')) {
+            // Stripe payment link - try to add amount if not present
+            paymentUrl = data.p;
+            if (!data.p.includes('amount=')) {
+              paymentUrl = data.p + (data.p.includes('?') ? '&' : '?') + 'amount=' + (data.t * 100);
+            }
+            paymentText = 'Pay with Card (Stripe)';
           } else if (data.p.toLowerCase().includes('paypal')) {
             if (data.p.includes('paypal.me')) {
               paymentUrl = data.p + '/' + data.t;
@@ -694,6 +709,9 @@
           
           paymentBtn.href = paymentUrl;
           paymentBtn.innerHTML = '<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16.5 16.5v-15h-15v15h15zM7.5 7.5h6v6h-6V7.5z"/></svg> ' + paymentText;
+          if (data.p.toLowerCase().includes('stripe')) {
+            paymentBtn.classList.add('stripe');
+          }
           paymentNote.textContent = 'Total: $' + data.t.toLocaleString();
           paymentSection.style.display = 'block';
         }
