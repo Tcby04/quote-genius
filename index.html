@@ -316,6 +316,38 @@
       text-decoration: none;
     }
 
+    .payment-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .payment-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: #008CFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .payment-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 140, 255, 0.4);
+    }
+
+    .payment-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+    }
+
     @media (max-width: 500px) {
       .line-item {
         grid-template-columns: 1fr;
@@ -346,6 +378,10 @@
         
         <label>Phone / Email (optional)</label>
         <input type="text" id="contact" placeholder="(555) 123-4567">
+        
+        <label>Payment Link (optional)</label>
+        <input type="text" id="payment" placeholder="Venmo @joe or https://paypal.me/joe">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">Add your Venmo, CashApp, PayPal, or payment link</p>
       </div>
 
       <div class="card">
@@ -397,6 +433,14 @@
 
         <div class="created-with">
           Created with <a href="/">Quote Genius</a>
+        </div>
+
+        <div class="payment-section" id="paymentSection" style="display: none;">
+          <a href="#" target="_blank" rel="noopener" class="payment-btn" id="paymentBtn">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16.5 16.5v-15h-15v15h15zM7.5 7.5h6v6h-6V7.5z"/></svg>
+            Pay Now
+          </a>
+          <p class="payment-note" id="paymentNote"></p>
         </div>
       </div>
     </div>
@@ -459,6 +503,7 @@
       const businessName = document.getElementById('businessName').value.trim();
       const fromName = document.getElementById('fromName').value.trim();
       const contact = document.getElementById('contact').value.trim();
+      const payment = document.getElementById('payment').value.trim();
       
       if (!businessName || !fromName) {
         alert('Please enter your business name and your name');
@@ -483,6 +528,7 @@
         b: businessName,
         f: fromName,
         c: contact,
+        p: payment,
         i: items,
         t: calculateTotal()
       };
@@ -561,6 +607,45 @@
         });
         document.getElementById('qServices').innerHTML = servicesHtml;
         document.getElementById('qTotal').textContent = '$' + data.t.toLocaleString();
+
+        // Handle payment link
+        if (data.p) {
+          const paymentSection = document.getElementById('paymentSection');
+          const paymentBtn = document.getElementById('paymentBtn');
+          const paymentNote = document.getElementById('paymentNote');
+          
+          let paymentUrl = data.p;
+          let paymentText = 'Pay Now';
+          
+          // Detect payment type and format appropriately
+          if (data.p.toLowerCase().includes('venmo')) {
+            const handle = data.p.replace(/@/g, '').replace(/venmo/gi, '').trim();
+            paymentUrl = 'https://venmo.com/' + handle + '?txn=pay&amount=' + data.t + '&note=Payment';
+            paymentText = 'Pay with Venmo';
+          } else if (data.p.toLowerCase().includes('cashapp')) {
+            const handle = data.p.replace(/\$/g, '').replace(/cashapp/gi, '').trim();
+            paymentUrl = 'https://cash.app/$' + handle + '/' + data.t;
+            paymentText = 'Pay with CashApp';
+          } else if (data.p.toLowerCase().includes('paypal')) {
+            if (data.p.includes('paypal.me')) {
+              paymentUrl = data.p + '/' + data.t;
+            } else {
+              paymentUrl = 'https://paypal.me/' + data.p.replace(/@/g, '').replace(/paypal/gi, '').trim() + '/' + data.t;
+            }
+            paymentText = 'Pay with PayPal';
+          } else if (data.p.startsWith('http')) {
+            paymentUrl = data.p;
+            paymentText = 'Pay Now';
+          } else {
+            paymentUrl = 'https://' + data.p;
+            paymentText = 'Pay Now';
+          }
+          
+          paymentBtn.href = paymentUrl;
+          paymentBtn.innerHTML = '<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16.5 16.5v-15h-15v15h15zM7.5 7.5h6v6h-6V7.5z"/></svg> ' + paymentText;
+          paymentNote.textContent = 'Total: $' + data.t.toLocaleString();
+          paymentSection.style.display = 'block';
+        }
         
       } catch (e) {
         alert('Invalid quote link');
