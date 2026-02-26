@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Genius — Instant Quotes for Service Businesses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface-elevated: #252525;
+      --border: #333;
+      --text: #f5f5f5;
+      --text-muted: #888;
+      --accent: #ff6b35;
+      --accent-hover: #ff8555;
+      --success: #22c55e;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .line-items {
+      margin-bottom: 1rem;
+    }
+
+    .line-item {
+      display: grid;
+      grid-template-columns: 1fr 100px 40px;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: start;
+    }
+
+    .line-item input {
+      margin-bottom: 0;
+    }
+
+    .line-item .price-input {
+      font-family: 'Space Mono', monospace;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      padding: 0.5rem;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 6px;
+      font-size: 1.2rem;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .total-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .total-amount {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .actions .btn {
+      flex: 1;
+    }
+
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .success-message {
+      display: none;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .success-message code {
+      display: block;
+      background: var(--surface);
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      word-break: break-all;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+
+    /* Quote View (when viewing a quote) */
+    .quote-view {
+      display: none;
+    }
+
+    .quote-view.active {
+      display: block;
+    }
+
+    .builder-view {
+      display: block;
+    }
+
+    .builder-view.hidden {
+      display: none;
+    }
+
+    .quote-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quote-business-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .quote-from {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .quote-services {
+      margin-bottom: 2rem;
+    }
+
+    .quote-service-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quote-service-row:last-child {
+      border-bottom: none;
+    }
+
+    .quote-total {
+      text-align: right;
+      padding-top: 1rem;
+    }
+
+    .quote-total-amount {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .quote-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .created-with {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .created-with a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 500px) {
+      .line-item {
+        grid-template-columns: 1fr;
+      }
+      
+      .line-item .btn-icon {
+        justify-self: end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Builder View -->
+    <div class="builder-view" id="builder">
+      <header>
+        <div class="logo">⚡ Quote Genius</div>
+        <p class="tagline">Instant quotes. No signup. Send to customers in seconds.</p>
+      </header>
+
+      <div class="card">
+        <div class="card-title">Your Business</div>
+        <label>Business Name</label>
+        <input type="text" id="businessName" placeholder="Joe's Lawn Care">
+        
+        <label>Your Name</label>
+        <input type="text" id="fromName" placeholder="Joe Smith">
+        
+        <label>Phone / Email (optional)</label>
+        <input type="text" id="contact" placeholder="(555) 123-4567">
+      </div>
+
+      <div class="card">
+        <div class="card-title">Services</div>
+        <div class="line-items" id="lineItems">
+          <div class="line-item">
+            <input type="text" placeholder="Service description" class="service-desc">
+            <input type="number" placeholder="$0" class="price-input">
+            <button class="btn btn-ghost btn-icon" onclick="removeLine(this)">×</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="addLine()" style="width: 100%">+ Add Service</button>
+        
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-amount" id="total">$0</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="generateQuote()">Generate Quote Link</button>
+
+      <div class="success-message" id="success">
+        <strong>✓ Quote link created!</strong>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Click to copy link and send to customer</p>
+        <code id="quoteLink" onclick="copyLink()"></code>
+      </div>
+
+      <div class="actions" id="actions" style="display: none;">
+        <button class="btn btn-secondary" onclick="copyQuoteText()">Copy as Text</button>
+        <button class="btn btn-secondary" onclick="shareQuote()">Share Link</button>
+      </div>
+    </div>
+
+    <!-- Quote View -->
+    <div class="quote-view" id="quote">
+      <div class="card">
+        <div class="quote-header">
+          <div class="quote-business-name" id="qBusiness"></div>
+          <div class="quote-from" id="qFrom"></div>
+          <div class="quote-from" id="qContact" style="margin-top: 0.25rem;"></div>
+        </div>
+
+        <div class="quote-services" id="qServices"></div>
+
+        <div class="quote-total">
+          <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.25rem;">Total</div>
+          <div class="quote-total-amount" id="qTotal"></div>
+        </div>
+
+        <div class="created-with">
+          Created with <a href="/">Quote Genius</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lineItemCount = 1;
+
+    // Check if we're viewing a quote
+    const params = new URLSearchParams(window.location.search);
+    const quoteData = params.get('q');
+
+    if (quoteData) {
+      showQuote(quoteData);
+    }
+
+    function addLine() {
+      if (document.querySelectorAll('.line-item').length >= 5) {
+        alert('Free version supports up to 5 services. Upgrade coming soon!');
+        return;
+      }
+      
+      const div = document.createElement('div');
+      div.className = 'line-item';
+      div.innerHTML = `
+        <input type="text" placeholder="Service description" class="service-desc">
+        <input type="number" placeholder="$0" class="price-input">
+        <button class="btn btn-ghost btn-icon" onclick="removeLine(this)">×</button>
+      `;
+      document.getElementById('lineItems').appendChild(div);
+      lineItemCount++;
+    }
+
+    function removeLine(btn) {
+      const items = document.querySelectorAll('.line-item');
+      if (items.length > 1) {
+        btn.parentElement.remove();
+        calculateTotal();
+      }
+    }
+
+    function calculateTotal() {
+      const prices = document.querySelectorAll('.price-input');
+      let total = 0;
+      prices.forEach(p => {
+        total += parseFloat(p.value) || 0;
+      });
+      document.getElementById('total').textContent = '$' + total.toLocaleString();
+      return total;
+    }
+
+    // Calculate total on input change
+    document.addEventListener('input', function(e) {
+      if (e.target.classList.contains('price-input')) {
+        calculateTotal();
+      }
+    });
+
+    function generateQuote() {
+      const businessName = document.getElementById('businessName').value.trim();
+      const fromName = document.getElementById('fromName').value.trim();
+      const contact = document.getElementById('contact').value.trim();
+      
+      if (!businessName || !fromName) {
+        alert('Please enter your business name and your name');
+        return;
+      }
+
+      const items = [];
+      document.querySelectorAll('.line-item').forEach(item => {
+        const desc = item.querySelector('.service-desc').value.trim();
+        const price = parseFloat(item.querySelector('.price-input').value) || 0;
+        if (desc) {
+          items.push({ d: desc, p: price });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Please add at least one service');
+        return;
+      }
+
+      const data = {
+        b: businessName,
+        f: fromName,
+        c: contact,
+        i: items,
+        t: calculateTotal()
+      };
+
+      const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+      const url = window.location.origin + window.location.pathname + '?q=' + encoded;
+
+      document.getElementById('quoteLink').textContent = url;
+      document.getElementById('success').classList.add('show');
+      document.getElementById('actions').style.display = 'flex';
+    }
+
+    function copyLink() {
+      const link = document.getElementById('quoteLink').textContent;
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Link copied!');
+      });
+    }
+
+    function copyQuoteText() {
+      const businessName = document.getElementById('businessName').value;
+      const fromName = document.getElementById('fromName').value;
+      const total = calculateTotal();
+      
+      let text = `${businessName}\n`;
+      text += `From: ${fromName}\n\n`;
+      text += `Services:\n`;
+      
+      document.querySelectorAll('.line-item').forEach(item => {
+        const desc = item.querySelector('.service-desc').value;
+        const price = item.querySelector('.price-input').value;
+        if (desc) {
+          text += `• ${desc}: $${parseFloat(price).toLocaleString()}\n`;
+        }
+      });
+      
+      text += `\nTotal: $${total.toLocaleString()}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Quote copied as text!');
+      });
+    }
+
+    function shareQuote() {
+      const link = document.getElementById('quoteLink').textContent;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Your Quote',
+          text: 'Here\'s your quote',
+          url: link
+        });
+      } else {
+        copyLink();
+      }
+    }
+
+    function showQuote(encoded) {
+      try {
+        const data = JSON.parse(decodeURIComponent(atob(encoded)));
+        
+        document.getElementById('builder').classList.add('hidden');
+        document.getElementById('quote').classList.add('active');
+        
+        document.getElementById('qBusiness').textContent = data.b;
+        document.getElementById('qFrom').textContent = 'From: ' + data.f;
+        document.getElementById('qContact').textContent = data.c || '';
+        
+        let servicesHtml = '';
+        data.i.forEach(item => {
+          servicesHtml += `
+            <div class="quote-service-row">
+              <span>${item.d}</span>
+              <span style="font-family: 'Space Mono', monospace;">$${item.p.toLocaleString()}</span>
+            </div>
+          `;
+        });
+        document.getElementById('qServices').innerHTML = servicesHtml;
+        document.getElementById('qTotal').textContent = '$' + data.t.toLocaleString();
+        
+      } catch (e) {
+        alert('Invalid quote link');
+      }
+    }
+  </script>
+</body>
+</html>
