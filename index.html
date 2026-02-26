@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quote Genius — Instant Quotes for Service Businesses</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_AD_SENSE_ID" crossorigin="anonymous"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -413,6 +414,51 @@
         <button class="btn btn-secondary" onclick="copyQuoteText()">Copy as Text</button>
         <button class="btn btn-secondary" onclick="shareQuote()">Share Link</button>
       </div>
+
+      <!-- Pro Section -->
+      <div class="card" style="margin-top: 2rem; border-color: var(--accent);">
+        <div class="card-title" style="color: var(--accent);">⚡ Go Pro</div>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Unlock unlimited line items, custom logo, PDF export, and remove branding.
+        </p>
+        <div id="proLocked">
+          <button class="btn btn-primary" onclick="showProModal()" style="background: var(--accent);">Unlock Pro — $5/mo</button>
+        </div>
+        <div id="proUnlocked" style="display: none;">
+          <p style="color: var(--success); font-size: 0.9rem;">✓ Pro unlocked</p>
+          <label style="margin-top: 1rem;">Custom Logo URL</label>
+          <input type="text" id="customLogo" placeholder="https://your-site.com/logo.png" onchange="saveProData()">
+        </div>
+      </div>
+
+      <!-- Pro Modal -->
+      <div id="proModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 400px; margin: 1rem;">
+          <div class="card-title">Unlock Pro</div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Pay $5/month via Venmo/CashApp to unlock Pro features:
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; padding-left: 1.2rem;">
+            <li>Unlimited line items</li>
+            <li>Custom logo on quotes</li>
+            <li>PDF export</li>
+            <li>Remove "Created with Quote Genius"</li>
+          </ul>
+          <p style="font-size: 0.85rem; margin-bottom: 1rem;">
+            <strong>Venmo:</strong> @Trent-Brasel<br>
+            <strong>CashApp:</strong> $trentbrasel
+          </p>
+          <label>Enter your unlock code:</label>
+          <input type="text" id="unlockCode" placeholder="Code">
+          <button class="btn btn-primary" onclick="unlockPro()" style="width: 100%;">Unlock</button>
+          <button class="btn btn-ghost" onclick="closeProModal()" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+        </div>
+      </div>
+
+      <!-- AdSense -->
+      <div style="text-align: center; margin-top: 2rem;">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-YOUR_AD_SENSE_ID" data-ad-slot="YOUR_AD_SLOT" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      </div>
     </div>
 
     <!-- Quote View -->
@@ -458,8 +504,11 @@
     }
 
     function addLine() {
-      if (document.querySelectorAll('.line-item').length >= 5) {
-        alert('Free version supports up to 5 services. Upgrade coming soon!');
+      const isPro = localStorage.getItem('quoteGeniusPro');
+      const itemCount = document.querySelectorAll('.line-item').length;
+      
+      if (!isPro && itemCount >= 5) {
+        alert('Free version supports up to 5 services. Go Pro for unlimited!');
         return;
       }
       
@@ -530,7 +579,9 @@
         c: contact,
         p: payment,
         i: items,
-        t: calculateTotal()
+        t: calculateTotal(),
+        l: localStorage.getItem('quoteGeniusPro') ? localStorage.getItem('quoteGeniusLogo') || '' : '',
+        pro: localStorage.getItem('quoteGeniusPro') ? true : false
       };
 
       const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
@@ -647,10 +698,70 @@
           paymentSection.style.display = 'block';
         }
         
+        // Check for pro and show/hide branding
+        if (data.pro) {
+          // Pro user - hide branding, show custom logo if available
+          document.querySelector('.created-with').style.display = 'none';
+          if (data.l) {
+            const logoImg = document.createElement('img');
+            logoImg.src = data.l;
+            logoImg.style.maxHeight = '60px';
+            logoImg.style.marginBottom = '1rem';
+            document.querySelector('.quote-header').insertBefore(logoImg, document.querySelector('.quote-business-name'));
+          }
+        } else {
+          // Free user - show branding
+          document.querySelector('.created-with').style.display = 'block';
+        }
+        
       } catch (e) {
         alert('Invalid quote link');
       }
     }
+
+    // Pro functions
+    function checkPro() {
+      const isPro = localStorage.getItem('quoteGeniusPro');
+      if (isPro) {
+        document.getElementById('proLocked').style.display = 'none';
+        document.getElementById('proUnlocked').style.display = 'block';
+        const savedLogo = localStorage.getItem('quoteGeniusLogo');
+        if (savedLogo) {
+          document.getElementById('customLogo').value = savedLogo;
+        }
+      }
+    }
+
+    function showProModal() {
+      document.getElementById('proModal').style.display = 'flex';
+    }
+
+    function closeProModal() {
+      document.getElementById('proModal').style.display = 'none';
+    }
+
+    function unlockPro() {
+      const code = document.getElementById('unlockCode').value.trim();
+      // Simple code system - in production this would verify against a server
+      if (code && code.length >= 6) {
+        localStorage.setItem('quoteGeniusPro', 'true');
+        closeProModal();
+        checkPro();
+        alert('Pro unlocked! Thanks for supporting Quote Genius.');
+      } else {
+        alert('Invalid code. Pay $5 to get your unlock code.');
+      }
+    }
+
+    function saveProData() {
+      if (localStorage.getItem('quoteGeniusPro')) {
+        localStorage.setItem('quoteGeniusLogo', document.getElementById('customLogo').value);
+      }
+    }
+
+    // Run on load
+    checkPro();
+    (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 </body>
 </html>
