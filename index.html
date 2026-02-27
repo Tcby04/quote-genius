@@ -871,13 +871,16 @@
         return;
       }
       
-      // For now, just accept any code with 6+ characters
-      // Server validation can be added back later
-      localStorage.setItem('quoteGeniusPro', 'true');
-      localStorage.setItem('quoteGeniusCode', code);
-      closeProModal();
-      checkPro();
-      alert('Pro unlocked! Thanks for supporting Quote Genius.');
+      const validCodes = ['DEMO-PRO', 'TEST-1234', 'NEX-PRO'];
+      if (validCodes.includes(code)) {
+        localStorage.setItem('quoteGeniusPro', 'true');
+        localStorage.setItem('quoteGeniusCode', code);
+        closeProModal();
+        checkPro();
+        alert('Pro unlocked! Thanks for supporting Quote Genius.');
+      } else {
+        alert('Invalid code');
+      }
     }
 
     function saveProData() {
