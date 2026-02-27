@@ -428,6 +428,7 @@
       <div class="actions" id="actions" style="display: none;">
         <button class="btn btn-secondary" onclick="copyQuoteText()">Copy as Text</button>
         <button class="btn btn-secondary" onclick="shareQuote()">Share Link</button>
+        <button class="btn btn-secondary" onclick="exportPDF()" style="background: var(--accent); color: white;">📄 Export PDF</button>
       </div>
 
       <!-- Pro Section -->
@@ -618,6 +619,97 @@
       });
     }
 
+    // Save business info for Pro users
+    function saveBusinessInfo() {
+      if (localStorage.getItem('quoteGeniusPro')) {
+        const info = {
+          businessName: document.getElementById('businessName').value,
+          fromName: document.getElementById('fromName').value,
+          contact: document.getElementById('contact').value,
+          payment: document.getElementById('payment').value,
+          customLogo: document.getElementById('customLogo')?.value || ''
+        };
+        localStorage.setItem('quoteGeniusBusiness', JSON.stringify(info));
+      }
+    }
+
+    // Load saved business info
+    function loadBusinessInfo() {
+      if (localStorage.getItem('quoteGeniusPro')) {
+        const saved = localStorage.getItem('quoteGeniusBusiness');
+        if (saved) {
+          const info = JSON.parse(saved);
+          document.getElementById('businessName').value = info.businessName || '';
+          document.getElementById('fromName').value = info.fromName || '';
+          document.getElementById('contact').value = info.contact || '';
+          document.getElementById('payment').value = info.payment || '';
+          if (info.customLogo && document.getElementById('customLogo')) {
+            document.getElementById('customLogo').value = info.customLogo;
+          }
+        }
+      }
+    }
+
+    // Auto-save when fields change
+    document.addEventListener('input', function(e) {
+      if (['businessName', 'fromName', 'contact', 'payment'].includes(e.target.id)) {
+        saveBusinessInfo();
+      }
+    });
+
+    // PDF Export
+    function exportPDF() {
+      const businessName = document.getElementById('businessName').value || 'Your Business';
+      const fromName = document.getElementById('fromName').value || 'Name';
+      const contact = document.getElementById('contact').value || '';
+      const total = calculateTotal();
+      
+      let itemsHTML = '';
+      document.querySelectorAll('.line-item').forEach(item => {
+        const desc = item.querySelector('.service-desc').value;
+        const price = item.querySelector('.price-input').value;
+        if (desc) {
+          itemsHTML += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee;">${desc}</td><td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${parseFloat(price || 0).toLocaleString()}</td></tr>`;
+        }
+      });
+
+      const isPro = localStorage.getItem('quoteGeniusPro');
+      const branding = isPro ? '' : `<p style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">Created with Quote Genius</p>`;
+
+      const customLogo = localStorage.getItem('quoteGeniusLogo');
+      const logoHTML = customLogo ? `<img src="${customLogo}" style="max-height: 60px; margin-bottom: 20px;">` : '';
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Quote - ${businessName}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; color: #333; }
+            h1 { margin-bottom: 5px; }
+            .from { color: #666; margin-bottom: 30px; }
+            table { width: 100%; border-collapse: collapse; }
+            .total { font-size: 24px; font-weight: bold; margin-top: 20px; text-align: right; }
+            @media print { body { padding: 20px; } }
+          </style>
+        </head>
+        <body>
+          ${logoHTML}
+          <h1>${businessName}</h1>
+          <p class="from">From: ${fromName}${contact ? '<br>' + contact : ''}</p>
+          <table>
+            ${itemsHTML}
+          </table>
+          <p class="total">Total: $${total.toLocaleString()}</p>
+          ${branding}
+          <script>window.print();<\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
     function copyQuoteText() {
       const businessName = document.getElementById('businessName').value;
       const fromName = document.getElementById('fromName').value;
@@ -794,6 +886,7 @@
 
     // Run on load
     checkPro();
+    loadBusinessInfo();
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 </body>
