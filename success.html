@@ -152,20 +152,36 @@
     const sessionId = params.get('session_id');
 
     if (sessionId) {
-      // Fetch code from our server
-      fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
-        .then(res => res.json())
-        .then(data => {
-          if (data.code) {
-            document.getElementById('code').textContent = data.code;
-          } else {
-            document.getElementById('code').textContent = 'ERROR';
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          document.getElementById('code').textContent = 'ERROR';
-        });
+      document.getElementById('code').textContent = 'Loading...';
+      
+      // Try fetching with retry
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      function tryFetch() {
+        fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
+          .then(res => res.json())
+          .then(data => {
+            if (data.code) {
+              document.getElementById('code').textContent = data.code;
+            } else if (attempts < maxAttempts) {
+              attempts++;
+              setTimeout(tryFetch, 2000);
+            } else {
+              document.getElementById('code').textContent = 'ERROR';
+            }
+          })
+          .catch(err => {
+            if (attempts < maxAttempts) {
+              attempts++;
+              setTimeout(tryFetch, 2000);
+            } else {
+              document.getElementById('code').textContent = 'ERROR';
+            }
+          });
+      }
+      
+      tryFetch();
     } else {
       document.getElementById('code').textContent = 'NO CODE';
     }
