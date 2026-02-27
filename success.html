@@ -152,40 +152,42 @@
     const sessionId = params.get('session_id');
 
     if (sessionId) {
-      document.getElementById('code').textContent = 'Loading...';
+      document.getElementById('code').textContent = 'Waking up server...';
       
-      // Try fetching immediately then retry
-      let attempts = 0;
-      const maxAttempts = 15;
-      
-      function tryFetch() {
-        fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
-          .then(res => res.json())
-          .then(data => {
-            if (data.code) {
-              document.getElementById('code').textContent = data.code;
-            } else if (attempts < maxAttempts) {
-              attempts++;
-              setTimeout(tryFetch, 2000);
-            } else {
-              document.getElementById('code').textContent = 'REFRESH PAGE';
-              document.getElementById('code').style.cursor = 'pointer';
-              document.getElementById('code').onclick = () => location.reload();
-            }
-          })
-          .catch(err => {
-            if (attempts < maxAttempts) {
-              attempts++;
-              setTimeout(tryFetch, 2000);
-            } else {
-              document.getElementById('code').textContent = 'REFRESH PAGE';
-              document.getElementById('code').style.cursor = 'pointer';
-              document.getElementById('code').onclick = () => location.reload();
-            }
-          });
-      }
-      
-      tryFetch();
+      // First, ping the server to wake it up
+      fetch('https://quote-genius-server.onrender.com/admin/codes')
+        .then(() => {
+          // Now start polling for the code
+          let attempts = 0;
+          const maxAttempts = 20;
+          
+          function tryFetch() {
+            fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
+              .then(res => res.json())
+              .then(data => {
+                if (data.code) {
+                  document.getElementById('code').textContent = data.code;
+                } else if (attempts < maxAttempts) {
+                  attempts++;
+                  setTimeout(tryFetch, 2000);
+                } else {
+                  document.getElementById('code').textContent = sessionId.substring(0,8).toUpperCase();
+                  alert('Code not found. Your code is: ' + sessionId.substring(0,8).toUpperCase());
+                }
+              })
+              .catch(err => {
+                if (attempts < maxAttempts) {
+                  attempts++;
+                  setTimeout(tryFetch, 2000);
+                }
+              });
+          }
+          
+          setTimeout(tryFetch, 1000);
+        })
+        .catch(err => {
+          document.getElementById('code').textContent = 'ERROR';
+        });
     } else {
       document.getElementById('code').textContent = 'NO CODE';
     }
