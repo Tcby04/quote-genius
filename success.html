@@ -154,8 +154,8 @@
     if (sessionId) {
       document.getElementById('code').textContent = 'Looking up code...';
       
-      // Use session ID as fallback code
-      const fallbackCode = sessionId.substring(0, 8).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      // Use session ID as code (it's already unique)
+      const code = sessionId.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
       
       // First wake up server
       fetch('https://quote-genius-server.onrender.com/admin/codes')
@@ -173,8 +173,8 @@
                   attempts++;
                   setTimeout(tryFetch, 1500);
                 } else {
-                  // Use session ID as code
-                  document.getElementById('code').textContent = fallbackCode;
+                  // Use session ID as code - but map it in server first
+                  document.getElementById('code').textContent = code;
                 }
               })
               .catch(err => {
@@ -182,7 +182,7 @@
                   attempts++;
                   setTimeout(tryFetch, 1500);
                 } else {
-                  document.getElementById('code').textContent = fallbackCode;
+                  document.getElementById('code').textContent = code;
                 }
               });
           }
@@ -190,7 +190,7 @@
           setTimeout(tryFetch, 1000);
         })
         .catch(err => {
-          document.getElementById('code').textContent = fallbackCode;
+          document.getElementById('code').textContent = code;
         });
     } else {
       document.getElementById('code').textContent = 'NO CODE';
