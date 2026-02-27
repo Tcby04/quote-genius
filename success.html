@@ -154,9 +154,9 @@
     if (sessionId) {
       document.getElementById('code').textContent = 'Loading...';
       
-      // Try fetching with retry - more attempts, longer delays
+      // Try fetching immediately then retry
       let attempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 15;
       
       function tryFetch() {
         fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
@@ -166,26 +166,26 @@
               document.getElementById('code').textContent = data.code;
             } else if (attempts < maxAttempts) {
               attempts++;
-              setTimeout(tryFetch, 3000);
+              setTimeout(tryFetch, 2000);
             } else {
-              // Last resort - show manual code entry
-              document.getElementById('code').textContent = 'CHECK EMAIL';
-              document.getElementById('code').style.fontSize = '1rem';
+              document.getElementById('code').textContent = 'REFRESH PAGE';
+              document.getElementById('code').style.cursor = 'pointer';
+              document.getElementById('code').onclick = () => location.reload();
             }
           })
           .catch(err => {
             if (attempts < maxAttempts) {
               attempts++;
-              setTimeout(tryFetch, 3000);
+              setTimeout(tryFetch, 2000);
             } else {
-              document.getElementById('code').textContent = 'CHECK EMAIL';
-              document.getElementById('code').style.fontSize = '1rem';
+              document.getElementById('code').textContent = 'REFRESH PAGE';
+              document.getElementById('code').style.cursor = 'pointer';
+              document.getElementById('code').onclick = () => location.reload();
             }
           });
       }
       
-      // Start with a small delay first
-      setTimeout(tryFetch, 2000);
+      tryFetch();
     } else {
       document.getElementById('code').textContent = 'NO CODE';
     }
