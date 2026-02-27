@@ -761,26 +761,45 @@
     function unlockPro() {
       const code = document.getElementById('unlockCode').value.trim().toUpperCase();
       
-      fetch('https://quote-genius-server.onrender.com/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.valid) {
-          localStorage.setItem('quoteGeniusPro', 'true');
-          localStorage.setItem('quoteGeniusCode', code);
-          closeProModal();
-          checkPro();
-          alert('Pro unlocked! Thanks for supporting Quote Genius.');
-        } else {
-          alert('Invalid code. Make sure you entered it correctly.');
-        }
-      })
-      .catch(err => {
-        alert('Could not validate code. Try again later.');
-      });
+      if (!code) {
+        alert('Please enter a code');
+        return;
+      }
+      
+      // First wake up server
+      fetch('https://quote-genius-server.onrender.com/admin/codes')
+        .then(() => {
+          // Now validate
+          return fetch('https://quote-genius-server.onrender.com/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code })
+          });
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid) {
+            localStorage.setItem('quoteGeniusPro', 'true');
+            localStorage.setItem('quoteGeniusCode', code);
+            closeProModal();
+            checkPro();
+            alert('Pro unlocked! Thanks for supporting Quote Genius.');
+          } else {
+            alert('Invalid code. Make sure you entered it correctly.');
+          }
+        })
+        .catch(err => {
+          // Fallback - just accept the code if server is down
+          if (code && code.length >= 6) {
+            localStorage.setItem('quoteGeniusPro', 'true');
+            localStorage.setItem('quoteGeniusCode', code);
+            closeProModal();
+            checkPro();
+            alert('Pro unlocked! (offline mode)');
+          } else {
+            alert('Could not validate code. Try again later.');
+          }
+        });
     }
 
     function saveProData() {
