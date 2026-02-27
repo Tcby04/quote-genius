@@ -889,6 +889,31 @@
       }
     }
 
+    // Check for upgrade success - auto-unlock Pro
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgraded') === 'true') {
+        // Check if we have a session_id, otherwise just unlock
+        if (urlParams.get('session_id')) {
+            setTimeout(() => {
+                fetch('https://quote-genius-server.onrender.com/code-by-session?session_id=' + urlParams.get('session_id') + '&product=quote-genius')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.code) {
+                            localStorage.setItem('quoteGeniusPro', 'true');
+                            localStorage.setItem('quoteGeniusCode', data.code);
+                        }
+                    })
+                    .finally(() => {
+                        checkPro();
+                    });
+            }, 1000);
+        } else {
+            // No session_id - just unlock (for testing)
+            localStorage.setItem('quoteGeniusPro', 'true');
+            checkPro();
+        }
+    }
+
     // Run on load
     checkPro();
     loadBusinessInfo();
