@@ -152,14 +152,16 @@
     const sessionId = params.get('session_id');
 
     if (sessionId) {
-      document.getElementById('code').textContent = 'Waking up server...';
+      document.getElementById('code').textContent = 'Looking up code...';
       
-      // First, ping the server to wake it up
+      // Use session ID as fallback code
+      const fallbackCode = sessionId.substring(0, 8).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      
+      // First wake up server
       fetch('https://quote-genius-server.onrender.com/admin/codes')
         .then(() => {
-          // Now start polling for the code
           let attempts = 0;
-          const maxAttempts = 20;
+          const maxAttempts = 10;
           
           function tryFetch() {
             fetch('https://quote-genius-server.onrender.com/get-code?session=' + sessionId)
@@ -169,16 +171,18 @@
                   document.getElementById('code').textContent = data.code;
                 } else if (attempts < maxAttempts) {
                   attempts++;
-                  setTimeout(tryFetch, 2000);
+                  setTimeout(tryFetch, 1500);
                 } else {
-                  document.getElementById('code').textContent = sessionId.substring(0,8).toUpperCase();
-                  alert('Code not found. Your code is: ' + sessionId.substring(0,8).toUpperCase());
+                  // Use session ID as code
+                  document.getElementById('code').textContent = fallbackCode;
                 }
               })
               .catch(err => {
                 if (attempts < maxAttempts) {
                   attempts++;
-                  setTimeout(tryFetch, 2000);
+                  setTimeout(tryFetch, 1500);
+                } else {
+                  document.getElementById('code').textContent = fallbackCode;
                 }
               });
           }
@@ -186,7 +190,7 @@
           setTimeout(tryFetch, 1000);
         })
         .catch(err => {
-          document.getElementById('code').textContent = 'ERROR';
+          document.getElementById('code').textContent = fallbackCode;
         });
     } else {
       document.getElementById('code').textContent = 'NO CODE';
