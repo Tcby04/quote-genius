@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful — Quote Genius Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface-elevated: #252525;
+      --border: #333;
+      --text: #f5f5f5;
+      --text-muted: #888;
+      --accent: #ff6b35;
+      --success: #22c55e;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 450px;
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(34, 197, 94, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      font-size: 40px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .code-box {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .code-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .code {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 4px;
+    }
+
+    .instructions {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+
+    .instructions h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .instructions ol {
+      padding-left: 1.2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon">✓</div>
+    <h1>Payment Successful!</h1>
+    <p class="subtitle">Thank you for subscribing to Quote Genius Pro</p>
+
+    <div class="code-box">
+      <div class="code-label">Your unlock code</div>
+      <div class="code" id="code">LOADING...</div>
+    </div>
+
+    <div class="instructions">
+      <h3>How to activate:</h3>
+      <ol>
+        <li>Go to <strong>Quote Genius</strong></li>
+        <li>Click <strong>"Unlock Pro"</strong></li>
+        <li>Enter the code above</li>
+        <li>Enjoy Pro features!</li>
+      </ol>
+    </div>
+
+    <a href="https://tcby04.github.io/quote-genius/" class="btn">Go to Quote Genius</a>
+  </div>
+
+  <script>
+    // Get the session ID from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
+    if (sessionId) {
+      // Fetch code from our server
+      fetch('https://1789-2607-fb90-bf1a-5f0-5ad4-77b2-24c9-ffe1.ngrok-free.app/get-code?session=' + sessionId)
+        .then(res => res.json())
+        .then(data => {
+          if (data.code) {
+            document.getElementById('code').textContent = data.code;
+          } else {
+            document.getElementById('code').textContent = 'ERROR';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('code').textContent = 'ERROR';
+        });
+    } else {
+      document.getElementById('code').textContent = 'NO CODE';
+    }
+  </script>
+</body>
+</html>
